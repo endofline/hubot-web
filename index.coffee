@@ -7,6 +7,8 @@ string = require("string")
 # sendmessageURL domain.com/messages/new/channel/ + user.channel
 sendMessageUrl = process.env.HUBOT_REST_SEND_URL
 
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
+
 class WebAdapter extends Adapter
   toHTML: (message) ->
     # message = string(message).escapeHTML().s
@@ -28,11 +30,20 @@ class WebAdapter extends Adapter
 
       message = if process.env.HUBOT_HTML_RESPONSE then @toHTML(strings.shift()) else strings.shift()
 
-      process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
+      console.log "[#{user.room}] => #{message}"
 
-      request.post({ url: sendMessageUrl + user.room, headers:{'Content-Length': encodeURIComponent(message).length + 8} }).form({
-        message: message
-      })
+      response = {
+        message:message
+      }
+
+      options = {
+        url: sendMessageUrl + user.room,
+        method:'POST',
+        body:response,
+        json:true
+      }
+
+      request(options)
       @send user, strings...
 
   reply: (user, strings...) ->
