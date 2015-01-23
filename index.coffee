@@ -28,9 +28,10 @@ class WebAdapter extends Adapter
 
       message = if process.env.HUBOT_HTML_RESPONSE then @toHTML(strings.shift()) else strings.shift()
 
-      request.post(sendMessageUrl+user.room).form({
-        message: message,
-        from: "#{@robot.name}"
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
+
+      request.post({ url: sendMessageUrl + user.room, headers:{'Content-Length': encodeURIComponent(message).length + 8} }).form({
+        message: message
       })
       @send user, strings...
 
